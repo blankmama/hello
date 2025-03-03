@@ -1,25 +1,28 @@
-import asyncio
 from telegram import Update
-from telegram.ext import Application, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 
-# আপনার Telegram Bot Token
-TOKEN = "7669153355:AAHFQrk5U6Uqno-i4v166VRMwdN34fsq8Kk"
+# আপনার টোকেন এখানে বসান
+TOKEN = '7669153355:AAHFQrk5U6Uqno-i4v166VRMwdN34fsq8Kk'
 
-# মেসেজ হ্যান্ডলার ফাংশন (async method)
-async def handle_message(update: Update, context):
-    text = update.message.text
-    await update.message.reply_text(f"🤖 আপনি বললেন: {text}")
+async def start(update: Update, context):
+    await update.message.reply_text('হাই')
 
-# অ্যাপ তৈরি করা
-app = Application.builder().token(TOKEN).build()
+async def echo(update: Update, context):
+    await update.message.reply_text('হাই')
 
-# মেসেজ হ্যান্ডলার যোগ করা
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+def main():
+    application = ApplicationBuilder().token(TOKEN).build()
 
-# বট চালানো (asyncio loop)
-async def main():
-    print("🤖 Bot is running...")
-    await app.run_polling(drop_pending_updates=True)  # drop_pending_updates=True ব্যবহার করলে পুরানো মেসেজ ড্রপ হবে
+    # কমান্ড হ্যান্ডলার
+    start_handler = CommandHandler('start', start)
+    application.add_handler(start_handler)
 
-if __name__ == "__main__":
-    asyncio.run(main())  # asyncio.run() এর মাধ্যমে main() ফাংশন চালানো হবে
+    # মেসেজ হ্যান্ডলার
+    echo_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
+    application.add_handler(echo_handler)
+
+    # বট চালু করুন
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
