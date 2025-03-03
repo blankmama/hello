@@ -1,30 +1,25 @@
-from flask import Flask, request
-import telegram
-import os
+import asyncio
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters
 
-# Telegram Bot Token (Railway-এর Environment Variable থেকে)
-TOKEN = os.getenv("BOT_TOKEN")  
-bot = telegram.Bot(token=TOKEN)
+# 🔹 আপনার Telegram Bot Token
+TOKEN = "7669153355:AAHFQrk5U6Uqno-i4v166VRMwdN34fsq8Kk"
 
-# Flask অ্যাপ তৈরি
-app = Flask(__name__)
-
-@app.route(f"/{TOKEN}", methods=["POST"])
-def webhook():
-    """ টেলিগ্রাম বটের জন্য Webhook হ্যান্ডলার """
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
-    chat_id = update.message.chat.id
+# ✅ ইউজারের মেসেজের রিপ্লাই ফাংশন (async method)
+async def handle_message(update: Update, context):
     text = update.message.text
+    await update.message.reply_text(f"🤖 আপনি বললেন: {text}")
 
-    # ইউজারকে রিপ্লাই পাঠানো
-    bot.send_message(chat_id=chat_id, text=f"🤖 আপনি বললেন: {text}")
+# ✅ অ্যাপ তৈরি করা
+app = Application.builder().token(TOKEN).build()
 
-    return "OK", 200
+# 🔹 মেসেজ হ্যান্ডলার যোগ করা
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-@app.route("/", methods=["GET"])
-def home():
-    """ হোমপেজ টেস্টিং """
-    return "Bot is running!", 200
+# ✅ বট চালানো (asyncio loop)
+async def main():
+    print("🤖 Bot is running...")
+    await app.run_polling()
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    asyncio.run(main())
